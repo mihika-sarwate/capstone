@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VentureVerse AI — Would your startup survive?</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:#f0f7f5;color:#0d1f22;overflow-x:hidden}
+
+/* ── TICKER ── */
+.ticker{background:#2D5157;padding:9px 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-flex;animation:tick 28s linear infinite;gap:0}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 32px;font-size:12px;font-weight:600;color:#BBD3DA;font-family:'Space Mono',monospace;letter-spacing:.02em}
+.tick-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tick-red{background:#e07a6a}
+.tick-green{background:#6dcfb0}
+.tick-yellow{background:#e8c97a}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── NAV ── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:#fff;border-bottom:2px solid #0d1f22;position:sticky;top:0;z-index:100}
+.logo{font-size:20px;font-weight:800;color:#0d1f22;letter-spacing:-.03em}
+.logo span{color:#519CAB}
+.logo-tag{font-size:10px;font-weight:700;background:#519CAB;color:#fff;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle;letter-spacing:.05em}
+.nav-links{display:flex;gap:4px}
+.nl{font-size:13px;font-weight:600;color:#2D5157;padding:7px 16px;border-radius:8px;cursor:pointer;transition:all .15s}
+.nl:hover,.nl.a{background:#2D5157;color:#fff}
+.nav-cta{background:#519CAB;color:#fff;border:2px solid #0d1f22;padding:9px 22px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:3px 3px 0 #0d1f22;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+.nav-cta:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #0d1f22}
+
+/* ── HERO ── */
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:520px;border-bottom:2px solid #0d1f22}
+.hero-left{background:#BBD3DA;padding:60px 48px;display:flex;flex-direction:column;justify-content:center;border-right:2px solid #0d1f22;position:relative;overflow:hidden}
+.hero-left::before{content:'✦';position:absolute;font-size:200px;color:rgba(45,81,87,.08);top:-40px;right:-30px;line-height:1}
+.hero-eyebrow{font-size:11px;font-weight:800;color:#2D5157;text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';width:28px;height:3px;background:#2D5157;border-radius:2px}
+.hero-left h1{font-size:44px;font-weight:800;line-height:1.1;color:#0d1f22;margin-bottom:20px;letter-spacing:-.03em}
+.hero-left h1 em{font-style:normal;color:#2D5157;text-decoration:underline;text-decoration-color:#519CAB;text-underline-offset:4px}
+.hero-left p{font-size:15px;color:#2D5157;line-height:1.7;margin-bottom:32px;max-width:420px;font-weight:500}
+.hero-btns{display:flex;gap:12px;align-items:center}
+.btn-primary{background:#2D5157;color:#fff;border:2px solid #0d1f22;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:4px 4px 0 #0d1f22;transition:all .15s;display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif}
+.btn-primary:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #0d1f22}
+.btn-secondary{background:transparent;color:#2D5157;border:2px solid #2D5157;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+.hero-right{position:relative;overflow:hidden;background:#2D5157}
+.hero-right img{width:100%;height:100%;object-fit:cover;display:block;mix-blend-mode:luminosity;opacity:.6}
+.hero-right-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:40px}
+.hero-stat-big{font-size:80px;font-weight:800;color:#BBD3DA;line-height:1;letter-spacing:-.04em;font-family:'Space Mono',monospace}
+.hero-stat-label{font-size:16px;font-weight:700;color:rgba(187,211,218,.7);margin-top:6px}
+
+/* ── STAT STRIP ── */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid #0d1f22}
+.strip-stat{padding:28px 32px;border-right:2px solid #0d1f22;background:#fff}
+.strip-stat:last-child{border-right:none}
+.strip-num{font-size:36px;font-weight:800;color:#2D5157;font-family:'Space Mono',monospace;letter-spacing:-.03em}
+.strip-label{font-size:12px;font-weight:600;color:#519CAB;margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+.strip-note{font-size:11px;color:#888;margin-top:4px}
+
+/* ── SECTION ── */
+.section{padding:60px 40px}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px}
+.section-title{font-size:32px;font-weight:800;color:#0d1f22;letter-spacing:-.02em;line-height:1.15}
+.section-title span{color:#519CAB}
+.section-sub{font-size:13px;font-weight:600;color:#888;max-width:320px;text-align:right;line-height:1.5}
+
+/* ── FORM CARD ── */
+.form-card{background:#fff;border:2px solid #0d1f22;border-radius:20px;overflow:hidden;box-shadow:6px 6px 0 #0d1f22}
+.form-card-header{background:#2D5157;padding:22px 28px;display:flex;align-items:center;justify-content:space-between}
+.form-card-header h3{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.01em}
+.form-card-header p{font-size:12px;color:#BBD3DA;font-weight:500;margin-top:2px}
+.step-pills{display:flex;gap:6px}
+.step-pill{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;border:1.5px solid rgba(187,211,218,.3);color:rgba(187,211,218,.5)}
+.step-pill.active{background:#BBD3DA;color:#0d1f22;border-color:#BBD3DA}
+.form-body{padding:28px}
+.igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.ig{display:flex;flex-direction:column;gap:6px}
+.ig label{font-size:11px;font-weight:700;color:#2D5157;text-transform:uppercase;letter-spacing:.07em}
+.ig select,.ig input{font-size:14px;font-weight:600;padding:11px 14px;border:2px solid #d0e6ec;border-radius:10px;background:#f8fcfd;color:#0d1f22;width:100%;transition:border .15s}
+.ig select:focus,.ig input:focus{border-color:#519CAB;outline:none}
+.form-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px}
+.form-note{font-size:12px;color:#888;font-weight:500}
+
+/* ── RESULTS LAYOUT ── */
+.results-wrap{display:grid;grid-template-columns:300px 1fr;gap:20px}
+
+/* ── SCORE CARD ── */
+.score-card{background:#2D5157;border:2px solid #0d1f22;border-radius:20px;padding:32px 24px;text-align:center;box-shadow:5px 5px 0 #0d1f22}
+.score-eyebrow{font-size:10px;font-weight:700;color:#BBD3DA;text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px}
+.score-circle{width:160px;height:160px;margin:0 auto 20px;position:relative}
+.score-num-big{font-size:52px;font-weight:800;color:#fff;font-family:'Space Mono',monospace;letter-spacing:-.04em;line-height:1.1;margin-bottom:4px}
+.score-status{display:inline-block;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;background:rgba(232,201,122,.2);color:#e8c97a;border:1.5px solid rgba(232,201,122,.4);margin-bottom:24px}
+.risk-list{text-align:left}
+.risk-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.risk-item:last-child{border-bottom:none}
+.risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.risk-name{font-size:12px;font-weight:600;color:#BBD3DA;flex:1}
+.risk-bar-wrap{width:60px}
+.risk-bar-bg{height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.risk-bar{height:100%;border-radius:2px}
+.risk-pct{font-size:11px;font-weight:700;color:rgba(187,211,218,.6);min-width:28px;text-align:right;font-family:'Space Mono',monospace}
+
+/* ── PANEL ── */
+.panel{background:#fff;border:2px solid #0d1f22;border-radius:20px;overflow:hidden;box-shadow:5px 5px 0 #0d1f22}
+.panel-header{padding:18px 24px;border-bottom:2px solid #eee;display:flex;align-items:center;justify-content:space-between}
+.panel-header h3{font-size:16px;font-weight:800;color:#0d1f22;letter-spacing:-.01em}
+.panel-body{padding:20px 24px}
+
+/* ── SIM ROWS ── */
+.sim-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1.5px dashed #e8f2f5}
+.sim-row:last-child{border-bottom:none}
+.sim-action{font-size:13px;font-weight:600;color:#0d1f22;flex:1;line-height:1.4}
+.sim-before{font-size:12px;color:#aaa;font-family:'Space Mono',monospace;min-width:30px;text-align:right}
+.sim-arr{font-size:13px;color:#BBD3DA;font-weight:700}
+.sim-after{font-size:15px;font-weight:800;min-width:36px;font-family:'Space Mono',monospace}
+.sim-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px}
+.tag-up{background:#dff0f3;color:#2D5157}
+.tag-dn{background:#fce9e6;color:#c0392b}
+
+/* ── AGENT CARDS ── */
+.agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.agent-card{border:2px solid #eee;border-radius:14px;padding:14px;transition:all .2s;cursor:pointer}
+.agent-card:hover{border-color:#519CAB;transform:translateY(-2px)}
+.agent-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.agent-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.ai1{background:#dff0f3;color:#2D5157}
+.ai2{background:#e1f5ee;color:#1a7a5a}
+.ai3{background:#fef5e4;color:#9a7a30}
+.ai4{background:#fce9e6;color:#c0392b}
+.agent-score{font-size:22px;font-weight:800;font-family:'Space Mono',monospace}
+.ag-good{color:#2D5157}
+.ag-warn{color:#9a7a30}
+.ag-bad{color:#c0392b}
+.agent-name{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em}
+.agent-note{font-size:12px;color:#555;font-weight:500;line-height:1.4}
+.agent-verdict{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;margin-top:6px}
+.v-pass{background:#dff0f3;color:#2D5157}
+.v-warn{background:#fef5e4;color:#9a7a30}
+.v-fail{background:#fce9e6;color:#c0392b}
+
+/* ── GRAVEYARD ── */
+.gy-section{background:#0d1f22;padding:60px 40px}
+.gy-header-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px}
+.gy-title{font-size:32px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.gy-title span{color:#519CAB}
+.gy-sub{font-size:13px;color:rgba(187,211,218,.5);margin-top:6px}
+.gy-stats{display:flex;gap:20px}
+.gy-stat{text-align:right}
+.gy-stat-num{font-size:28px;font-weight:800;color:#BBD3DA;font-family:'Space Mono',monospace}
+.gy-stat-label{font-size:11px;color:rgba(187,211,218,.4);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+
+.gy-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.gy-card{background:#fff;border:2px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;transition:all .2s;cursor:pointer}
+.gy-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.gy-card-img{height:140px;position:relative;overflow:hidden}
+.gy-card-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(.6)}
+.gy-card-img-ov{position:absolute;inset:0;display:flex;align-items:flex-end;padding:14px}
+.gy-card-sector{font-size:10px;font-weight:700;color:#BBD3DA;background:rgba(45,81,87,.8);padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em}
+.gy-card-body{padding:16px}
+.gy-card-name{font-size:16px;font-weight:800;color:#0d1f22;margin-bottom:4px;letter-spacing:-.01em}
+.gy-card-meta{font-size:11px;color:#888;font-weight:500;margin-bottom:10px}
+.gy-card-reason{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+.gy-card-amount{font-size:12px;color:#888;font-weight:500;margin-top:6px;font-family:'Space Mono',monospace}
+.tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;display:inline-block}
+.t-pmf{background:#dff0f3;color:#2D5157}
+.t-cash{background:#fef5e4;color:#9a7a30}
+.t-team{background:#e8ecfe;color:#3730a3}
+.t-comp{background:#fce9e6;color:#c0392b}
+
+.gy-img-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gy-big-card{position:relative;border-radius:16px;overflow:hidden;height:200px;border:2px solid rgba(255,255,255,.08)}
+.gy-big-card img{width:100%;height:100%;object-fit:cover;filter:brightness(.4) saturate(.6)}
+.gy-big-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,31,34,.95) 20%,transparent 65%);display:flex;flex-direction:column;justify-content:flex-end;padding:20px}
+.gy-big-tag{font-size:10px;font-weight:700;color:#519CAB;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.gy-big-title{font-size:16px;font-weight:800;color:#fff;line-height:1.35}
+
+/* ── MULTIVERSE ── */
+.mv-section{background:#BBD3DA;padding:60px 40px;border-top:2px solid #0d1f22;border-bottom:2px solid #0d1f22}
+.mv-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:36px}
+.mv-card{background:#fff;border:2px solid #0d1f22;border-radius:20px;padding:24px;position:relative;box-shadow:4px 4px 0 #0d1f22;transition:all .2s}
+.mv-card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #0d1f22}
+.mv-card.best{background:#2D5157;border-color:#0d1f22;box-shadow:4px 4px 0 #0d1f22}
+.mv-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;background:#519CAB;color:#fff;padding:4px 16px;border-radius:20px;border:2px solid #0d1f22;white-space:nowrap;letter-spacing:.03em}
+.mv-path{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.mv-card.best .mv-path{color:rgba(187,211,218,.6)}
+.mv-score{font-size:48px;font-weight:800;letter-spacing:-.04em;font-family:'Space Mono',monospace;line-height:1;margin-bottom:16px}
+.mv-card.best .mv-score{color:#BBD3DA}
+.mv-change{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#555;margin-bottom:6px;line-height:1.4}
+.mv-card.best .mv-change{color:rgba(187,211,218,.7)}
+.mv-change i{font-size:14px;flex-shrink:0}
+.i-good{color:#2D5157}
+.i-bad{color:#c0392b}
+.i-mid{color:#9a7a30}
+.mv-card.best .i-good{color:#6dcfb0}
+
+/* ── BOARDROOM ── */
+.br-section{padding:60px 40px;background:#fff;border-top:2px solid #0d1f22}
+.br-chat{display:flex;flex-direction:column;gap:16px;margin-top:36px}
+.br-msg{display:flex;gap:14px}
+.br-msg.right{flex-direction:row-reverse}
+.br-av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:2px solid #0d1f22;font-weight:700}
+.av-inv{background:#BBD3DA;color:#2D5157}
+.av-prod{background:#dff0f3;color:#1a7a5a}
+.av-mkt{background:#fef5e4;color:#9a7a30}
+.av-fin{background:#fce9e6;color:#c0392b}
+.br-bubble{max-width:76%;background:#f8f8f8;border:2px solid #eee;border-radius:4px 16px 16px 16px;padding:14px 18px}
+.br-msg.right .br-bubble{border-radius:16px 4px 16px 16px;background:#2D5157;border-color:#2D5157}
+.br-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:#519CAB}
+.br-msg.right .br-role{color:#BBD3DA}
+.br-text{font-size:13px;font-weight:500;color:#0d1f22;line-height:1.65}
+.br-msg.right .br-text{color:#fff}
+.br-verdict{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;margin-top:8px}
+.v-pass{background:#dff0f3;color:#2D5157}
+.v-warn{background:#fef5e4;color:#9a7a30}
+.v-fail{background:#fce9e6;color:#c0392b}
+
+/* ── BOTTOM CTA ── */
+.cta-section{background:#519CAB;border-top:2px solid #0d1f22;padding:64px 40px;text-align:center;position:relative;overflow:hidden}
+.cta-section::before{content:'?';position:absolute;font-size:400px;font-weight:800;color:rgba(45,81,87,.12);top:-80px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;line-height:1;pointer-events:none}
+.cta-section h2{font-size:48px;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:14px;position:relative}
+.cta-section p{font-size:16px;color:rgba(255,255,255,.75);font-weight:500;margin-bottom:36px;position:relative}
+.cta-btns{display:flex;gap:14px;justify-content:center;position:relative}
+.cta-btn-main{background:#fff;color:#2D5157;border:2px solid #0d1f22;padding:16px 36px;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:4px 4px 0 #0d1f22;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+.cta-btn-main:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #0d1f22}
+.cta-btn-sec{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.5);padding:16px 28px;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>Byju's shuts down · $5.8B raised, still failed</span>
+    <span class="ticker-item"><span class="tick-dot tick-yellow"></span>India VC funding ↓7% in 9M 2024</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>39,860+ Indian startups closed in 2023–25</span>
+    <span class="ticker-item"><span class="tick-dot tick-green"></span>Global VC hits $368B in 2024</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>BluSmart collapses · $170M raised</span>
+    <span class="ticker-item"><span class="tick-dot tick-yellow"></span>43% of startups fail due to no market need</span>
+    <span class="ticker-item"><span class="tick-dot tick-green"></span>AI gets 25% of all VC funding in 2025</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>GoMechanic shuts down · fraud + wrong team</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>Byju's shuts down · $5.8B raised, still failed</span>
+    <span class="ticker-item"><span class="tick-dot tick-yellow"></span>India VC funding ↓7% in 9M 2024</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>39,860+ Indian startups closed in 2023–25</span>
+    <span class="ticker-item"><span class="tick-dot tick-green"></span>Global VC hits $368B in 2024</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>BluSmart collapses · $170M raised</span>
+    <span class="ticker-item"><span class="tick-dot tick-yellow"></span>43% of startups fail due to no market need</span>
+    <span class="ticker-item"><span class="tick-dot tick-green"></span>AI gets 25% of all VC funding in 2025</span>
+    <span class="ticker-item"><span class="tick-dot tick-red"></span>GoMechanic shuts down · fraud + wrong team</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">VentureVerse<span>AI</span><span class="logo-tag">BETA</span></div>
+  <div class="nav-links">
+    <span class="nl a">Simulate</span>
+    <span class="nl">Graveyard</span>
+    <span class="nl">Market Pulse</span>
+    <span class="nl">My Startups</span>
+  </div>
+  <button class="nav-cta">Try it free →</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">AI-powered startup intelligence</div>
+    <h1>Would your startup actually <em>survive?</em></h1>
+    <p>90% of startups fail. Most founders find out the hard way. Test your idea against 15,000+ real failures before you burn a single rupee building the wrong thing.</p>
+    <div class="hero-btns">
+      <button class="btn-primary"><i class="ti ti-player-play"></i> Simulate my startup</button>
+      <button class="btn-secondary">See how it works</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80" alt="Startup team"/>
+    <div class="hero-right-overlay">
+      <div class="hero-stat-big">90%</div>
+      <div class="hero-stat-label">of startups fail. Don't be one of them.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STAT STRIP -->
+<div class="stat-strip">
+  <div class="strip-stat">
+    <div class="strip-num">39K+</div>
+    <div class="strip-label">India closures 2023–25</div>
+    <div class="strip-note">Tracxn data</div>
+  </div>
+  <div class="strip-stat">
+    <div class="strip-num">$17.5B</div>
+    <div class="strip-label">Raised by failed startups</div>
+    <div class="strip-note">CB Insights 2024</div>
+  </div>
+  <div class="strip-stat">
+    <div class="strip-num">43%</div>
+    <div class="strip-label">Fail due to no market need</div>
+    <div class="strip-note">483 post-mortems</div>
+  </div>
+  <div class="strip-stat">
+    <div class="strip-num">22mo</div>
+    <div class="strip-label">Median time to shutdown</div>
+    <div class="strip-note">After last fundraise</div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="section" style="background:#f0f7f5">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Test your idea.<br><span>Before it tests you.</span></div>
+    </div>
+    <div class="section-sub">Takes 30 seconds. Saves you months of building the wrong thing.</div>
+  </div>
+  <div class="form-card">
+    <div class="form-card-header">
+      <div>
+        <h3>Configure your startup</h3>
+        <p>Tell us about your idea and we'll run it through 483 real failure patterns</p>
+      </div>
+      <div class="step-pills">
+        <span class="step-pill active">01 Details</span>
+        <span class="step-pill">02 Simulate</span>
+        <span class="step-pill">03 Results</span>
+      </div>
+    </div>
+    <div class="form-body">
+      <div class="igrid">
+        <div class="ig"><label>Industry</label><select><option>InsurTech</option><option>FinTech</option><option>EdTech</option><option>HealthTech</option><option>SaaS B2B</option><option>eCommerce</option></select></div>
+        <div class="ig"><label>Business model</label><select><option>Subscription (SaaS)</option><option>Marketplace</option><option>Freemium</option><option>D2C</option><option>Transaction fee</option></select></div>
+        <div class="ig"><label>Target market</label><select><option>B2C — College students</option><option>B2B — SMEs</option><option>B2B — Enterprise</option><option>B2B2C</option></select></div>
+        <div class="ig"><label>Team size</label><select><option>Solo founder</option><option>2 — Co-founders</option><option>3–5 people</option><option>6–10 people</option></select></div>
+        <div class="ig"><label>Initial funding (₹)</label><input type="text" value="2,00,000" placeholder="e.g. 5,00,000"/></div>
+        <div class="ig"><label>Geography</label><select><option>India — Tier 1 city</option><option>India — Tier 2/3</option><option>Southeast Asia</option><option>Global</option></select></div>
+      </div>
+      <div class="form-footer">
+        <span class="form-note">🔒 Your data is private. We never share it.</span>
+        <button class="btn-primary"><i class="ti ti-player-play"></i> Run simulation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="section" style="background:#fff;border-top:2px solid #0d1f22">
+  <div class="section-header">
+    <div class="section-title">Your results.<br><span>Brutally honest.</span></div>
+    <div class="section-sub">InsurTech · Subscription · ₹2L · 2 founders · India Tier 1</div>
+  </div>
+
+  <div class="results-wrap">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="score-card">
+        <div class="score-eyebrow">Success probability</div>
+        <svg width="140" height="140" viewBox="0 0 140 140" style="display:block;margin:0 auto 12px">
+          <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="10"/>
+          <circle cx="70" cy="70" r="58" fill="none" stroke="#BBD3DA" stroke-width="10"
+            stroke-dasharray="364" stroke-dashoffset="117" stroke-linecap="round"
+            transform="rotate(-90 70 70)"/>
+          <text x="70" y="63" text-anchor="middle" font-size="30" font-weight="800" fill="#fff" font-family="Space Mono,monospace">68%</text>
+          <text x="70" y="83" text-anchor="middle" font-size="11" fill="rgba(187,211,218,.5)" font-family="Space Grotesk,sans-serif">out of 100</text>
+        </svg>
+        <div class="score-status">⚠ Medium risk</div>
+        <div class="risk-list">
+          <div class="risk-item"><span class="risk-dot" style="background:#519CAB"></span><span class="risk-name">No market need</span><div class="risk-bar-wrap"><div class="risk-bar-bg"><div class="risk-bar" style="width:43%;background:#519CAB"></div></div></div><span class="risk-pct">43%</span></div>
+          <div class="risk-item"><span class="risk-dot" style="background:#e8c97a"></span><span class="risk-name">Cash runway</span><div class="risk-bar-wrap"><div class="risk-bar-bg"><div class="risk-bar" style="width:70%;background:#e8c97a"></div></div></div><span class="risk-pct">70%</span></div>
+          <div class="risk-item"><span class="risk-dot" style="background:#BBD3DA"></span><span class="risk-name">Team gaps</span><div class="risk-bar-wrap"><div class="risk-bar-bg"><div class="risk-bar" style="width:23%;background:#BBD3DA"></div></div></div><span class="risk-pct">23%</span></div>
+          <div class="risk-item"><span class="risk-dot" style="background:rgba(187,211,218,.4)"></span><span class="risk-name">Competition</span><div class="risk-bar-wrap"><div class="risk-bar-bg"><div class="risk-bar" style="width:19%;background:rgba(187,211,218,.4)"></div></div></div><span class="risk-pct">19%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Multiverse Simulator™</h3>
+          <span style="font-size:11px;font-weight:700;color:#888">What if you changed something?</span>
+        </div>
+        <div class="panel-body">
+          <div class="sim-row"><span class="sim-action">Add insurance domain co-founder</span><span class="sim-before">68%</span><span class="sim-arr">→</span><span class="sim-after" style="color:#2D5157">79%</span><span class="sim-tag tag-up">+11%</span></div>
+          <div class="sim-row"><span class="sim-action">Raise funding to ₹20 lakhs</span><span class="sim-before">68%</span><span class="sim-arr">→</span><span class="sim-after" style="color:#2D5157">81%</span><span class="sim-tag tag-up">+13%</span></div>
+          <div class="sim-row"><span class="sim-action">Switch target to SME businesses</span><span class="sim-before">68%</span><span class="sim-arr">→</span><span class="sim-after" style="color:#2D5157">76%</span><span class="sim-tag tag-up">+8%</span></div>
+          <div class="sim-row"><span class="sim-action">✦ Apply all 3 changes above</span><span class="sim-before">68%</span><span class="sim-arr">→</span><span class="sim-after" style="color:#2D5157;font-size:17px">89%</span><span class="sim-tag tag-up" style="font-size:12px">+21%</span></div>
+          <div class="sim-row"><span class="sim-action">Launch without any changes</span><span class="sim-before">68%</span><span class="sim-arr">→</span><span class="sim-after" style="color:#c0392b">51%</span><span class="sim-tag tag-dn">−17%</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>AI Boardroom Scores</h3></div>
+        <div class="panel-body">
+          <div class="agent-grid">
+            <div class="agent-card">
+              <div class="agent-top"><div class="agent-icon ai1"><i class="ti ti-building-bank"></i></div><div class="agent-score ag-bad">4/10</div></div>
+              <div class="agent-name">Investor agent</div>
+              <div class="agent-note">Underfunded for InsurTech. &lt;4 months runway.</div>
+              <span class="agent-verdict v-fail">Pass</span>
+            </div>
+            <div class="agent-card">
+              <div class="agent-top"><div class="agent-icon ai2"><i class="ti ti-device-mobile"></i></div><div class="agent-score ag-warn">6/10</div></div>
+              <div class="agent-name">Product agent</div>
+              <div class="agent-note">PMF unclear for student segment.</div>
+              <span class="agent-verdict v-warn">Conditional</span>
+            </div>
+            <div class="agent-card">
+              <div class="agent-top"><div class="agent-icon ai3"><i class="ti ti-speakerphone"></i></div><div class="agent-score ag-warn">5/10</div></div>
+              <div class="agent-name">Marketing agent</div>
+              <div class="agent-note">CAC too high for current budget.</div>
+              <span class="agent-verdict v-warn">Revise</span>
+            </div>
+            <div class="agent-card">
+              <div class="agent-top"><div class="agent-icon ai4"><i class="ti ti-chart-line"></i></div><div class="agent-score ag-bad">3/10</div></div>
+              <div class="agent-name">Financial agent</div>
+              <div class="agent-note">Burn rate exceeds runway by 8 months.</div>
+              <span class="agent-verdict v-fail">Critical</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRAVEYARD -->
+<div class="gy-section">
+  <div class="gy-header-row">
+    <div>
+      <div class="gy-title">The Startup<br><span>Graveyard.</span></div>
+      <div class="gy-sub">15,921 failed startups. Every one of them thought they'd make it.</div>
+    </div>
+    <div class="gy-stats">
+      <div class="gy-stat"><div class="gy-stat-num">$17.5B</div><div class="gy-stat-label">raised, then lost</div></div>
+      <div class="gy-stat"><div class="gy-stat-num">483</div><div class="gy-stat-label">post-mortems</div></div>
+    </div>
+  </div>
+
+  <div class="gy-cards">
+    <div class="gy-card">
+      <div class="gy-card-img"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80" alt="analytics"/><div class="gy-card-img-ov"><span class="gy-card-sector">EdTech · India</span></div></div>
+      <div class="gy-card-body">
+        <div class="gy-card-name">Byju's</div>
+        <div class="gy-card-meta">Bengaluru · Closed 2024</div>
+        <div class="gy-card-reason"><span class="tag t-cash">Ran out of cash</span></div>
+        <div class="gy-card-amount">Raised $5.8B before collapse</div>
+      </div>
+    </div>
+    <div class="gy-card">
+      <div class="gy-card-img"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=80" alt="auto"/><div class="gy-card-img-ov"><span class="gy-card-sector">AutoTech · India</span></div></div>
+      <div class="gy-card-body">
+        <div class="gy-card-name">GoMechanic</div>
+        <div class="gy-card-meta">Gurugram · Closed 2023</div>
+        <div class="gy-card-reason"><span class="tag t-team">Wrong team / fraud</span></div>
+        <div class="gy-card-amount">Raised $62M before collapse</div>
+      </div>
+    </div>
+    <div class="gy-card">
+      <div class="gy-card-img"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="ev"/><div class="gy-card-img-ov"><span class="gy-card-sector">EV · India</span></div></div>
+      <div class="gy-card-body">
+        <div class="gy-card-name">BluSmart</div>
+        <div class="gy-card-meta">Delhi · Closed 2024</div>
+        <div class="gy-card-reason"><span class="tag t-cash">Ran out of cash</span></div>
+        <div class="gy-card-amount">Raised $170M before collapse</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gy-img-pair">
+    <div class="gy-big-card"><img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="startup"/><div class="gy-big-ov"><div class="gy-big-tag">CB Insights 2024 · 483 post-mortems</div><div class="gy-big-title">43% of startups fail because nobody wanted their product</div></div></div>
+    <div class="gy-big-card"><img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80" alt="team"/><div class="gy-big-ov"><div class="gy-big-tag">India 2023–2025 · Tracxn data</div><div class="gy-big-title">39,860 closures. Most could have been predicted.</div></div></div>
+  </div>
+</div>
+
+<!-- MULTIVERSE -->
+<div class="mv-section">
+  <div class="section-header" style="margin-bottom:0">
+    <div class="section-title" style="color:#0d1f22">Pick your path.<br><span>Own your future.</span></div>
+    <div class="section-sub">See exactly how each decision changes your startup's survival odds</div>
+  </div>
+  <div class="mv-grid">
+    <div class="mv-card">
+      <div class="mv-path">Path A — Launch as-is</div>
+      <div class="mv-score" style="color:#c0392b">51%</div>
+      <div class="mv-change"><i class="ti ti-x i-bad"></i> No changes made</div>
+      <div class="mv-change"><i class="ti ti-x i-bad"></i> Runway: 4 months</div>
+      <div class="mv-change"><i class="ti ti-x i-bad"></i> Target: college students</div>
+      <div class="mv-change"><i class="ti ti-x i-bad"></i> No domain expertise</div>
+    </div>
+    <div class="mv-card best">
+      <div class="mv-badge">✦ Best path</div>
+      <div class="mv-path">Path B — Optimized</div>
+      <div class="mv-score">89%</div>
+      <div class="mv-change"><i class="ti ti-check i-good"></i> Add insurance co-founder</div>
+      <div class="mv-change"><i class="ti ti-check i-good"></i> Raise to ₹20L+</div>
+      <div class="mv-change"><i class="ti ti-check i-good"></i> Pivot to SME market</div>
+      <div class="mv-change"><i class="ti ti-check i-good"></i> 12-month runway secured</div>
+    </div>
+    <div class="mv-card">
+      <div class="mv-path">Path C — Lean pivot</div>
+      <div class="mv-score" style="color:#519CAB">74%</div>
+      <div class="mv-change"><i class="ti ti-check i-good"></i> Switch to B2B2C</div>
+      <div class="mv-change"><i class="ti ti-check i-good"></i> Partner with colleges</div>
+      <div class="mv-change"><i class="ti ti-minus i-mid"></i> Funding still tight</div>
+      <div class="mv-change"><i class="ti ti-minus i-mid"></i> Slower growth expected</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOARDROOM CHAT -->
+<div class="br-section">
+  <div class="section-header">
+    <div class="section-title">Your AI board just <span>roasted your pitch.</span></div>
+    <div class="section-sub">4 agents. Zero sugarcoating. 100% data-backed.</div>
+  </div>
+  <div class="br-chat">
+    <div class="br-msg">
+      <div class="br-av av-inv"><i class="ti ti-building-bank"></i></div>
+      <div class="br-bubble">
+        <div class="br-role">Investor agent</div>
+        <div class="br-text">₹2 lakh is not going to cut it for InsurTech. Regulatory compliance alone costs ₹10–15L minimum. You have less than 4 months of runway — that's not a startup, that's a countdown timer.</div>
+        <span class="br-verdict v-fail">Hard pass on current terms</span>
+      </div>
+    </div>
+    <div class="br-msg right">
+      <div class="br-av av-prod"><i class="ti ti-device-mobile"></i></div>
+      <div class="br-bubble">
+        <div class="br-role">Product agent</div>
+        <div class="br-text">College students don't buy insurance. Full stop. Your ICP has zero purchasing power for this category. Pivot to gig workers or SME finance teams — they feel the pain AND have budget.</div>
+        <span class="br-verdict v-warn">Pivot the ICP first</span>
+      </div>
+    </div>
+    <div class="br-msg">
+      <div class="br-av av-mkt"><i class="ti ti-speakerphone"></i></div>
+      <div class="br-bubble">
+        <div class="br-role">Marketing agent</div>
+        <div class="br-text">InsurTech CAC runs $38–120 per customer. With ₹2L you get maybe 150 users before you're dead. That's not enough to validate anything. Look at partnership distribution — zero cash CAC.</div>
+        <span class="br-verdict v-warn">Fix distribution strategy</span>
+      </div>
+    </div>
+    <div class="br-msg right">
+      <div class="br-av av-fin"><i class="ti ti-chart-line"></i></div>
+      <div class="br-bubble">
+        <div class="br-role">Financial agent</div>
+        <div class="br-text">₹50K/month burn on a 2-person team + infra. 4 months of runway. Subscription MRR takes 8–12 months to compound enough for a raise. You need 3× this funding before you touch a line of code.</div>
+        <span class="br-verdict v-fail">Critical — raise before building</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Will your startup survive?</h2>
+  <p>Find out in 30 seconds. No signup needed. Just the truth.</p>
+  <div class="cta-btns">
+    <button class="cta-btn-main">Simulate my startup →</button>
+    <button class="cta-btn-sec">Explore the graveyard</button>
+  </div>
+</div>
+
+</body>
+</html>

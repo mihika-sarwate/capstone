@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VentureVerse AI — System Architecture Blueprint</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<style>
+  :root {
+    --navy:   #12212E;
+    --teal:   #307082;
+    --sage:   #6CA3A2;
+    --cream:  #ECE7DC;
+    --amber:  #EA9940;
+    --white:  #FFFFFF;
+    --dim:    #1e3344;
+    --card:   #192d3e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--navy);
+    color: var(--cream);
+    line-height: 1.7;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0a161f 0%, #12212E 50%, #1a3348 100%);
+    border-bottom: 3px solid var(--amber);
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 30%, rgba(48,112,130,.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 35% at 80% 70%, rgba(108,163,162,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: var(--amber);
+    color: var(--navy);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: .35rem 1rem;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .cover h1 {
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -.02em;
+    line-height: 1.1;
+    margin-bottom: .8rem;
+  }
+  .cover h1 span { color: var(--amber); }
+  .cover .subtitle {
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: var(--sage);
+    max-width: 680px;
+    margin-bottom: 3rem;
+  }
+  .cover-meta {
+    display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+    font-size: .85rem; color: var(--sage);
+  }
+  .cover-meta div { text-align: center; }
+  .cover-meta strong { display: block; color: var(--amber); font-size: 1.4rem; font-weight: 700; }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--dim);
+    border-bottom: 2px solid var(--teal);
+    padding: 3rem 2rem;
+  }
+  .toc-inner { max-width: 1100px; margin: 0 auto; }
+  .toc h2 { color: var(--amber); font-size: 1.1rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: .6rem; }
+  .toc-item {
+    display: flex; align-items: center; gap: .8rem;
+    padding: .6rem 1rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(48,112,130,.3);
+    border-radius: 6px;
+    text-decoration: none; color: var(--cream);
+    font-size: .85rem;
+    transition: background .2s, border-color .2s;
+  }
+  .toc-item:hover { background: rgba(48,112,130,.15); border-color: var(--teal); }
+  .toc-num { color: var(--amber); font-weight: 700; font-size: .78rem; min-width: 28px; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 5rem 2rem;
+    border-bottom: 1px solid rgba(108,163,162,.15);
+  }
+  .section:nth-child(even) { background: rgba(30,51,68,.35); }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-header {
+    display: flex; align-items: flex-start; gap: 1.4rem;
+    margin-bottom: 2.8rem;
+  }
+  .sec-num {
+    flex-shrink: 0;
+    width: 48px; height: 48px;
+    background: var(--amber);
+    color: var(--navy);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem;
+  }
+  .section-header h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .section-header p {
+    color: var(--sage);
+    font-size: .92rem;
+    margin-top: .4rem;
+    max-width: 700px;
+  }
+
+  /* ── DIAGRAM BOX ── */
+  .diagram-box {
+    background: var(--card);
+    border: 1px solid rgba(48,112,130,.4);
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 1.8rem 0;
+    overflow-x: auto;
+  }
+  .diagram-box h3 {
+    color: var(--sage);
+    font-size: .75rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(108,163,162,.2);
+    padding-bottom: .6rem;
+  }
+  .mermaid { min-width: 0; }
+
+  /* ── INFO CARDS ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1.2rem; margin: 1.8rem 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(48,112,130,.3);
+    border-radius: 8px;
+    padding: 1.4rem;
+  }
+  .card h4 { color: var(--amber); font-size: .9rem; margin-bottom: .6rem; }
+  .card p, .card li { color: var(--cream); font-size: .85rem; }
+  .card ul { padding-left: 1.2rem; }
+  .card li { margin-bottom: .25rem; }
+
+  /* ── PHASE TIMELINE ── */
+  .phase-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 1rem; margin: 1.8rem 0; }
+  .phase {
+    border-radius: 8px;
+    padding: 1.4rem;
+    border-top: 3px solid;
+  }
+  .phase:nth-child(1) { background: rgba(48,112,130,.1); border-color: var(--teal); }
+  .phase:nth-child(2) { background: rgba(108,163,162,.1); border-color: var(--sage); }
+  .phase:nth-child(3) { background: rgba(234,153,64,.1);  border-color: var(--amber); }
+  .phase:nth-child(4) { background: rgba(18,33,46,.6);    border-color: var(--white); }
+  .phase .phase-label { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: .4rem; }
+  .phase h4 { font-size: 1rem; color: var(--white); margin-bottom: .8rem; }
+  .phase ul { padding-left: 1.1rem; font-size: .83rem; color: var(--cream); }
+  .phase li { margin-bottom: .3rem; }
+
+  /* ── API TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: .83rem; margin: 1.4rem 0; }
+  th { background: rgba(48,112,130,.3); color: var(--amber); text-align: left; padding: .7rem 1rem; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+  td { padding: .65rem 1rem; border-bottom: 1px solid rgba(108,163,162,.12); color: var(--cream); }
+  tr:hover td { background: rgba(48,112,130,.08); }
+  code { background: rgba(234,153,64,.15); color: var(--amber); padding: .15rem .4rem; border-radius: 3px; font-size: .8rem; font-family: 'Courier New', monospace; }
+
+  /* ── FLOW STEPS ── */
+  .flow-steps { display: flex; flex-direction: column; gap: .6rem; margin: 1.4rem 0; }
+  .flow-step {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: var(--card); border: 1px solid rgba(48,112,130,.25);
+    border-radius: 6px; padding: 1rem 1.2rem;
+  }
+  .flow-step-num { color: var(--amber); font-weight: 700; font-size: .85rem; min-width: 28px; }
+  .flow-step-content h5 { color: var(--white); font-size: .9rem; margin-bottom: .2rem; }
+  .flow-step-content p { color: var(--sage); font-size: .82rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 3rem 2rem;
+    background: #0a161f;
+    color: var(--sage);
+    font-size: .8rem;
+    border-top: 2px solid var(--teal);
+  }
+  footer strong { color: var(--amber); }
+
+  /* mermaid svg size fix */
+  .mermaid svg { max-width: 100% !important; height: auto !important; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ COVER ══════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">Confidential Architecture Blueprint · v1.0</div>
+  <h1>Venture<span>Verse</span> AI</h1>
+  <p class="subtitle">Complete System Architecture Document — Production-Ready SaaS Platform for Startup Intelligence, Prediction & Multiverse Simulation</p>
+  <div class="cover-meta">
+    <div><strong>13</strong>Architecture Sections</div>
+    <div><strong>40+</strong>System Diagrams</div>
+    <div><strong>10</strong>Core AI Modules</div>
+    <div><strong>AWS</strong>Cloud Deployment</div>
+  </div>
+</div>
+
+<!-- ══════════════════════ TOC ══════════════════════ -->
+<div class="toc">
+  <div class="toc-inner">
+    <h2>Table of Contents</h2>
+    <div class="toc-grid">
+      <a class="toc-item" href="#s1"><span class="toc-num">01</span>Complete User Journey</a>
+      <a class="toc-item" href="#s2"><span class="toc-num">02</span>End-to-End Workflow</a>
+      <a class="toc-item" href="#s3"><span class="toc-num">03</span>Backend Architecture</a>
+      <a class="toc-item" href="#s4"><span class="toc-num">04</span>Database Design (ER)</a>
+      <a class="toc-item" href="#s5"><span class="toc-num">05</span>AI Architecture</a>
+      <a class="toc-item" href="#s6"><span class="toc-num">06</span>RAG Architecture</a>
+      <a class="toc-item" href="#s7"><span class="toc-num">07</span>Multiverse Simulator</a>
+      <a class="toc-item" href="#s8"><span class="toc-num">08</span>AI Boardroom Workflow</a>
+      <a class="toc-item" href="#s9"><span class="toc-num">09</span>Development Roadmap</a>
+      <a class="toc-item" href="#s10"><span class="toc-num">10</span>Admin Workflow</a>
+      <a class="toc-item" href="#s11"><span class="toc-num">11</span>API Architecture</a>
+      <a class="toc-item" href="#s12"><span class="toc-num">12</span>Production Deployment</a>
+      <a class="toc-item" href="#s13"><span class="toc-num">13</span>Master Ecosystem Diagram</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 1 — USER JOURNEY
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">01</div>
+    <div>
+      <h2>Complete User Journey</h2>
+      <p>Every screen a user touches — from landing page to final board recommendation.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>High-Level Screen Flow</h3>
+    <div class="mermaid">
+flowchart TD
+    A([🌐 Landing Page]) --> B([📝 Sign Up / Login])
+    B --> C([🔐 Auth — JWT Issued])
+    C --> D([📊 Dashboard])
+    D --> E([➕ New Project])
+    E --> F([📋 Startup Input Form])
+    F --> G{Validate Inputs}
+    G -- Invalid --> F
+    G -- Valid --> H([⚙️ Analyzing...])
+    H --> I([📈 Results Page])
+    I --> J1([🧬 Founder DNA])
+    I --> J2([🌀 Simulation Page])
+    I --> J3([💀 Graveyard Page])
+    I --> J4([📡 Market Pulse])
+    I --> J5([🤖 AI Boardroom])
+    I --> J6([💡 Recommendations])
+    J2 --> K([📊 Scenario Comparison])
+    J5 --> L([📝 Board Report])
+    J6 --> M([✅ Action Plan])
+    D --> N([⚙️ Settings / Profile])
+    D --> O([📁 Past Projects])
+    O --> I
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Detailed Screen-by-Screen Journey</h3>
+    <div class="mermaid">
+journey
+    title VentureVerse AI — User Journey
+    section Discovery
+      Visit Landing Page: 5: Visitor
+      Read Features & Pricing: 4: Visitor
+      Click Get Started: 5: Visitor
+    section Onboarding
+      Sign Up with Email/Google: 5: User
+      Verify Email: 3: User
+      Complete Profile: 4: User
+      Choose Plan (Free/Pro): 4: User
+    section First Analysis
+      Create New Project: 5: User
+      Fill Startup Input Form: 4: User
+      Submit for Analysis: 5: User
+      Wait for Results ~15s: 2: User
+    section Deep Dive
+      View Prediction Dashboard: 5: User
+      Explore Failure Similarity: 4: User
+      Run Multiverse Simulation: 5: User
+      Enter AI Boardroom: 5: User
+    section Insight & Action
+      Read Founder DNA Report: 4: User
+      Check Market Pulse: 4: User
+      Download Recommendations: 5: User
+      Share Report with Co-founder: 4: User
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Landing Page</h4>
+      <ul>
+        <li>Hero: "Predict. Simulate. Succeed."</li>
+        <li>Live demo preview widget</li>
+        <li>Feature grid (10 modules)</li>
+        <li>Pricing tiers</li>
+        <li>Social proof / testimonials</li>
+        <li>CTA → Sign Up</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Startup Input Form</h4>
+      <ul>
+        <li>Startup name, sector, stage</li>
+        <li>Founding team size & backgrounds</li>
+        <li>Funding raised, burn rate</li>
+        <li>Revenue model & MRR</li>
+        <li>Target geography & TAM</li>
+        <li>Competitor list</li>
+        <li>Product description (free-text → NLP)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Results / Dashboard</h4>
+      <ul>
+        <li>Success probability gauge (0–100%)</li>
+        <li>Risk score breakdown (SHAP)</li>
+        <li>Top 5 failure risks</li>
+        <li>Similar failed startups carousel</li>
+        <li>Quick-action buttons to each module</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>AI Boardroom</h4>
+      <ul>
+        <li>4 agent panels (Investor, Product, Marketing, Financial)</li>
+        <li>Real-time streaming responses</li>
+        <li>Agent debate log</li>
+        <li>Final consensus recommendation</li>
+        <li>Downloadable board report PDF</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Multiverse Simulator</h4>
+      <ul>
+        <li>Slider controls for key variables</li>
+        <li>Side-by-side scenario comparison</li>
+        <li>Probability change delta indicator</li>
+        <li>Timeline projections (12/24/36 months)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Graveyard Intelligence</h4>
+      <ul>
+        <li>Search & filter failed startups</li>
+        <li>Failure reason taxonomy</li>
+        <li>Funding history charts</li>
+        <li>Team profile breakdowns</li>
+        <li>Similarity score to user's startup</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 2 — END-TO-END WORKFLOW
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">02</div>
+    <div>
+      <h2>End-to-End Workflow</h2>
+      <p>Everything that happens between "Analyze Startup" click and the rendered results dashboard.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Primary Analysis Pipeline</h3>
+    <div class="mermaid">
+flowchart TD
+    U([User clicks Analyze Startup]) --> V1
+
+    subgraph INGESTION["① Input & Validation Layer"]
+        V1[Receive JSON Payload] --> V2[Schema Validation — Pydantic]
+        V2 --> V3{All fields valid?}
+        V3 -- No --> V4[Return 422 with field errors]
+        V3 -- Yes --> V5[Sanitize & Normalize inputs]
+        V5 --> V6[Store raw input in PostgreSQL]
+    end
+
+    V6 --> FE1
+
+    subgraph FEATURES["② Feature Engineering"]
+        FE1[Extract structured features] --> FE2[Encode categorical vars]
+        FE2 --> FE3[NLP embed product description]
+        FE3 --> FE4[Compute derived ratios\n burn_rate / runway / team_density]
+        FE4 --> FE5[Fetch live market signals\n from Market Pulse Engine]
+    end
+
+    FE5 --> ML1
+
+    subgraph ML["③ ML Prediction Layer"]
+        ML1[XGBoost — Success Probability] 
+        ML2[LightGBM — Failure Category]
+        ML3[Random Forest — Risk Score]
+        ML1 & ML2 & ML3 --> ML4[Ensemble Aggregator]
+        ML4 --> ML5[SHAP Explainer]
+    end
+
+    ML5 --> SIM1
+
+    subgraph SIM["④ Similarity Search — Qdrant"]
+        SIM1[Embed startup profile → vector] --> SIM2[Qdrant ANN search\n Top-K similar startups]
+        SIM2 --> SIM3[Filter by sector + stage]
+        SIM3 --> SIM4[Return similar success + failure cases]
+    end
+
+    SIM4 --> GR1
+
+    subgraph GRAPH["⑤ Graph Analysis — Neo4j"]
+        GR1[Find startup node in graph] --> GR2[Traverse investor relationships]
+        GR2 --> GR3[Traverse founder network]
+        GR3 --> GR4[Detect failure pattern subgraphs]
+    end
+
+    GR4 --> MKT1
+
+    subgraph MARKET["⑥ Market Pulse Engine"]
+        MKT1[Fetch sector funding trends] --> MKT2[Economic indicator signals]
+        MKT2 --> MKT3[Compute market timing score]
+    end
+
+    MKT3 --> AGT1
+
+    subgraph AGENTS["⑦ AI Agent Layer"]
+        AGT1[Investor Agent — OpenAI] 
+        AGT2[Product Agent — Claude]
+        AGT3[Marketing Agent — Gemini]
+        AGT4[Financial Agent — OpenAI]
+        AGT1 & AGT2 & AGT3 & AGT4 --> AGT5[Agent Orchestrator]
+        AGT5 --> AGT6[Consensus Board Report]
+    end
+
+    AGT6 --> REC1
+
+    subgraph REC["⑧ Recommendation Engine"]
+        REC1[Aggregate all signals] --> REC2[RAG retrieval from Qdrant]
+        REC2 --> REC3[LLM generates action plan]
+        REC3 --> REC4[Rank recommendations by impact]
+    end
+
+    REC4 --> OUT1
+
+    subgraph OUTPUT["⑨ Response Assembly"]
+        OUT1[Merge prediction + explanations\n + similarity + recommendations] --> OUT2[Cache in Redis TTL 1h]
+        OUT2 --> OUT3[Persist full report to PostgreSQL]
+        OUT3 --> OUT4[Return JSON to Next.js frontend]
+    end
+
+    OUT4 --> DASH([📊 Results Dashboard Rendered])
+    </div>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-content"><h5>Input Reception</h5><p>Next.js POSTs a structured JSON payload to <code>POST /api/v1/analyze</code>. FastAPI validates using Pydantic v2 models with custom validators for sector enums, numeric ranges, and date fields.</p></div></div>
+    <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-content"><h5>Feature Engineering</h5><p>Categorical features are one-hot encoded. Free-text product description is embedded via OpenAI text-embedding-3-small. Derived metrics (runway months, burn multiple, team diversity score) are computed in NumPy.</p></div></div>
+    <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-content"><h5>ML Prediction Ensemble</h5><p>XGBoost outputs a success probability. LightGBM classifies the most likely failure mode (product-market fit, cash flow, team, market timing). Random Forest produces a composite risk score. SHAP values are extracted per feature for explainability.</p></div></div>
+    <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-content"><h5>Vector Similarity Search</h5><p>The startup's feature vector is embedded and queried against Qdrant's startup-profiles collection (cosine similarity, top-20 results). Results are filtered by sector and funding stage, then ranked by similarity score.</p></div></div>
+    <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-content"><h5>Graph Traversal</h5><p>Neo4j Cypher queries identify common investor networks, failed-startup subgraph patterns, and founder background nodes that correlate with outcomes.</p></div></div>
+    <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-content"><h5>AI Agent Boardroom</h5><p>Four specialized LLM agents receive the full analysis context. Each produces a domain-specific critique. The orchestrator synthesizes them into a unified board report using a structured prompt chain.</p></div></div>
+    <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-content"><h5>Recommendation Generation</h5><p>RAG retrieves the 5 most similar historical success pivots from Qdrant. An LLM drafts a ranked, actionable recommendation plan. Redis caches the full response for repeat views.</p></div></div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 3 — BACKEND ARCHITECTURE
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">03</div>
+    <div>
+      <h2>Backend Architecture</h2>
+      <p>System topology, service boundaries, and all inter-service communication paths.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>System Architecture Diagram</h3>
+    <div class="mermaid">
+graph TB
+    subgraph CLIENT["Client Layer"]
+        NEXT[Next.js / React\nVercel CDN]
+    end
+
+    subgraph EDGE["Edge / Gateway Layer"]
+        CF[Cloudflare WAF & CDN]
+        GW[AWS API Gateway\nRate Limiting · Auth · CORS]
+    end
+
+    subgraph APP["Application Layer — AWS ECS Fargate"]
+        FA[FastAPI\nMain Service\n:8000]
+        WK[Celery Workers\nAsync Tasks]
+        BEAT[Celery Beat\nScheduled Jobs]
+    end
+
+    subgraph ML_SVC["ML Services Layer"]
+        MLS[ML Service\nXGBoost · LightGBM · RF\n:8001]
+        EMB[Embedding Service\nOpenAI Embeddings\n:8002]
+        AGT[Agent Orchestrator\nLangChain · OpenAI · Claude\n:8003]
+    end
+
+    subgraph DATA["Data Layer"]
+        PG[(PostgreSQL\nRDS Multi-AZ\nUsers · Projects · Reports)]
+        RD[(Redis\nElastiCache\nCache · Sessions · Queues)]
+        QD[(Qdrant\nVector DB\nSimilarity Search)]
+        N4[(Neo4j\nGraph DB\nRelationship Network)]
+        S3[(AWS S3\nRaw Data · Models · Reports)]
+    end
+
+    subgraph EXTERNAL["External AI APIs"]
+        OAI[OpenAI GPT-4o]
+        CLU[Anthropic Claude]
+        GEM[Google Gemini]
+    end
+
+    subgraph MONITOR["Observability"]
+        CW[AWS CloudWatch]
+        SN[Sentry APM]
+    end
+
+    NEXT --> CF --> GW --> FA
+    FA --> WK
+    FA --> RD
+    FA --> MLS
+    FA --> EMB
+    FA --> AGT
+    FA --> PG
+    FA --> QD
+    FA --> N4
+    WK --> MLS
+    WK --> EMB
+    WK --> PG
+    WK --> S3
+    WK --> RD
+    AGT --> OAI
+    AGT --> CLU
+    AGT --> GEM
+    MLS --> S3
+    BEAT --> WK
+    FA --> CW
+    FA --> SN
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>FastAPI Main Service</h4>
+      <ul>
+        <li>Async request handling (uvicorn)</li>
+        <li>JWT auth middleware</li>
+        <li>Request routing → ML / Agent / Data services</li>
+        <li>WebSocket support for streaming Boardroom</li>
+        <li>Background task dispatch to Celery</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Celery Workers</h4>
+      <ul>
+        <li>Heavy ML inference jobs</li>
+        <li>Dataset retraining pipelines</li>
+        <li>Batch embedding creation</li>
+        <li>Email/notification dispatch</li>
+        <li>Market data refresh (via Celery Beat)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>PostgreSQL (RDS)</h4>
+      <ul>
+        <li>Multi-AZ deployment for HA</li>
+        <li>Read replicas for analytics queries</li>
+        <li>pgcrypto for sensitive field encryption</li>
+        <li>Alembic for schema migrations</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Qdrant Vector DB</h4>
+      <ul>
+        <li>Collections: startup-profiles, graveyard, market-reports</li>
+        <li>1536-dim OpenAI embeddings</li>
+        <li>HNSW index for sub-10ms ANN search</li>
+        <li>Payload filtering (sector, stage, geography)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Neo4j Graph DB</h4>
+      <ul>
+        <li>Nodes: Startup, Founder, Investor, Market</li>
+        <li>Relationships: INVESTED_IN, FOUNDED_BY, FAILED_DUE_TO</li>
+        <li>Pattern matching for failure subgraphs</li>
+        <li>Community detection (Louvain algorithm)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Redis (ElastiCache)</h4>
+      <ul>
+        <li>Analysis result cache (TTL 1h)</li>
+        <li>Session store for JWT refresh tokens</li>
+        <li>Celery message broker</li>
+        <li>Rate-limit counters per user</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 4 — DATABASE DESIGN
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">04</div>
+    <div>
+      <h2>Database Design — ER Diagrams</h2>
+      <p>Complete entity-relationship model for all PostgreSQL tables with cardinalities.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Core Entity-Relationship Diagram</h3>
+    <div class="mermaid">
+erDiagram
+    USERS {
+        uuid id PK
+        string email UK
+        string password_hash
+        string full_name
+        string plan "free|pro|enterprise"
+        timestamp created_at
+        timestamp last_login
+        bool is_verified
+    }
+
+    PROJECTS {
+        uuid id PK
+        uuid user_id FK
+        string name
+        string status "draft|analyzing|complete"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    STARTUP_PROFILES {
+        uuid id PK
+        uuid project_id FK
+        string startup_name
+        string sector
+        string stage "pre-seed|seed|series-a|..."
+        int team_size
+        float funding_raised_usd
+        float monthly_burn_usd
+        float mrr_usd
+        string revenue_model
+        string geography
+        text product_description
+        jsonb raw_input
+        timestamp created_at
+    }
+
+    PREDICTIONS {
+        uuid id PK
+        uuid project_id FK
+        float success_probability
+        float risk_score
+        string predicted_failure_mode
+        jsonb shap_values
+        jsonb feature_importance
+        string model_version
+        timestamp created_at
+    }
+
+    SIMULATIONS {
+        uuid id PK
+        uuid project_id FK
+        string scenario_name
+        jsonb input_overrides
+        float result_probability
+        float delta_probability
+        jsonb scenario_timeline
+        timestamp created_at
+    }
+
+    AGENT_REPORTS {
+        uuid id PK
+        uuid project_id FK
+        string agent_name "investor|product|marketing|financial"
+        text report_text
+        jsonb recommendations
+        float confidence_score
+        timestamp created_at
+    }
+
+    FOUNDER_DNA_REPORTS {
+        uuid id PK
+        uuid project_id FK
+        float leadership_score
+        float risk_appetite_score
+        string decision_style
+        string communication_style
+        text analysis_summary
+        jsonb trait_breakdown
+        timestamp created_at
+    }
+
+    MARKET_REPORTS {
+        uuid id PK
+        uuid project_id FK
+        string sector
+        string geography
+        float funding_trend_score
+        float market_timing_score
+        jsonb economic_indicators
+        jsonb sector_benchmarks
+        timestamp created_at
+    }
+
+    RECOMMENDATIONS {
+        uuid id PK
+        uuid project_id FK
+        string category "product|funding|team|market|strategy"
+        string title
+        text description
+        string impact "high|medium|low"
+        string effort "high|medium|low"
+        int priority_rank
+        timestamp created_at
+    }
+
+    GRAVEYARD_STARTUPS {
+        uuid id PK
+        string name
+        string sector
+        string failure_reason
+        int year_founded
+        int year_failed
+        float total_funding_usd
+        jsonb funding_rounds
+        jsonb team_profile
+        text post_mortem
+        vector embedding
+    }
+
+    USERS ||--o{ PROJECTS : "owns"
+    PROJECTS ||--|| STARTUP_PROFILES : "has"
+    PROJECTS ||--|| PREDICTIONS : "produces"
+    PROJECTS ||--o{ SIMULATIONS : "runs"
+    PROJECTS ||--o{ AGENT_REPORTS : "generates"
+    PROJECTS ||--|| FOUNDER_DNA_REPORTS : "has"
+    PROJECTS ||--|| MARKET_REPORTS : "has"
+    PROJECTS ||--o{ RECOMMENDATIONS : "receives"
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Neo4j Graph Schema</h3>
+    <div class="mermaid">
+graph LR
+    subgraph NODES["Node Types"]
+        S([Startup\nname · sector · stage · outcome])
+        F([Founder\nname · background · edu · prev_exits])
+        I([Investor\nname · type · portfolio_size])
+        M([Market\nname · region · size_usd])
+        FR([FundingRound\namount · stage · date])
+    end
+    subgraph RELS["Relationship Types"]
+        S -->|FOUNDED_BY| F
+        I -->|INVESTED_IN| S
+        S -->|COMPETED_IN| M
+        S -->|RAISED| FR
+        S -->|SIMILAR_TO| S
+        S -->|FAILED_DUE_TO| S
+        F -->|PREVIOUSLY_FOUNDED| S
+    end
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 5 — AI ARCHITECTURE
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">05</div>
+    <div>
+      <h2>AI Architecture</h2>
+      <p>How data flows through every AI layer — from raw input to final explainable output.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>AI Processing Layers</h3>
+    <div class="mermaid">
+flowchart TD
+    RAW[Raw Startup Input JSON] --> L1
+
+    subgraph L1["Layer 1 — Input Processing"]
+        NLP[NLP Preprocessing\nspaCy tokenizer · entity extraction]
+        NORM[Numerical Normalization\nMinMax · StandardScaler]
+        ENC[Categorical Encoding\nTarget / One-Hot]
+        EMB_IN[Text Embedding\nOpenAI text-embedding-3-small]
+        NLP & NORM & ENC & EMB_IN --> FEAT_VEC[Feature Vector\n~512 dimensions]
+    end
+
+    FEAT_VEC --> L2
+
+    subgraph L2["Layer 2 — Prediction Layer"]
+        XGB[XGBoost\nSuccess Probability]
+        LGB[LightGBM\nFailure Mode Classification]
+        RF[Random Forest\nRisk Composite Score]
+        FEAT_VEC --> XGB & LGB & RF
+        XGB & LGB & RF --> ENS[Soft-Vote Ensemble\nWeighted Average]
+        ENS --> SHAP_EXP[SHAP TreeExplainer\nFeature Attribution]
+    end
+
+    SHAP_EXP --> L3
+
+    subgraph L3["Layer 3 — Similarity Layer"]
+        QD_SRCH[Qdrant ANN Search\nCosine Similarity]
+        GRAPH_Q[Neo4j Pattern Match\nCypher Subgraph Query]
+        FEAT_VEC --> QD_SRCH & GRAPH_Q
+        QD_SRCH --> SIM_RESULTS[Top-K Similar Startups]
+        GRAPH_Q --> NET_CONTEXT[Network Context\nInvestor · Founder Overlap]
+    end
+
+    SIM_RESULTS & NET_CONTEXT --> L4
+
+    subgraph L4["Layer 4 — Agent Layer"]
+        INV_AGT[Investor Agent\nOpenAI GPT-4o]
+        PRD_AGT[Product Agent\nClaude 3.5]
+        MKT_AGT[Marketing Agent\nGemini 1.5 Pro]
+        FIN_AGT[Financial Agent\nOpenAI GPT-4o]
+        ORCH[LangChain Orchestrator\nSequential Chain]
+        INV_AGT & PRD_AGT & MKT_AGT & FIN_AGT --> ORCH
+        ORCH --> BOARD[Board Consensus Report]
+    end
+
+    BOARD --> L5
+
+    subgraph L5["Layer 5 — Recommendation Layer"]
+        RAG_RETR[RAG Retrieval\nQdrant Top-5 pivot cases]
+        LLM_GEN[LLM Generation\nClaude — Action Plan]
+        RANK[Recommendation Ranker\nImpact × Effort Matrix]
+        RAG_RETR --> LLM_GEN --> RANK --> RECS[Ranked Recommendations]
+    end
+
+    RECS --> L6
+
+    subgraph L6["Layer 6 — Explanation Layer"]
+        SHAP_VIZ[SHAP Waterfall Chart\nTop risk factors]
+        CONF[Confidence Intervals\nBootstrap CI 95%]
+        NL_EXP[Natural Language Explanation\nLLM summary of SHAP values]
+        SHAP_EXP --> SHAP_VIZ & NL_EXP
+        SHAP_VIZ & CONF & NL_EXP --> XAI_DASH[XAI Dashboard Payload]
+    end
+
+    XAI_DASH --> FINAL[Unified Response JSON]
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>ML Models Used</h4>
+      <ul>
+        <li><strong>XGBoost</strong> — Binary success classifier (AUROC target 0.87+)</li>
+        <li><strong>LightGBM</strong> — Multi-class failure mode (8 categories)</li>
+        <li><strong>Random Forest</strong> — Risk score regressor (calibrated 0–100)</li>
+        <li>Models retrained monthly on new data via Celery Beat + S3 model registry</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>LLM Routing Strategy</h4>
+      <ul>
+        <li>OpenAI GPT-4o → Investor Agent, Financial Agent (structured output)</li>
+        <li>Claude 3.5 Sonnet → Product Agent, Recommendation Writer (long-form)</li>
+        <li>Gemini 1.5 Pro → Marketing Agent, Market Pulse (web-grounded)</li>
+        <li>Fallback chain: primary → secondary → cached last response</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Explainability (XAI)</h4>
+      <ul>
+        <li>SHAP TreeExplainer for tree models (fast, exact)</li>
+        <li>Top-10 feature importances per prediction</li>
+        <li>LLM translates SHAP output to plain English</li>
+        <li>Confidence intervals via bootstrap sampling</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 6 — RAG ARCHITECTURE
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">06</div>
+    <div>
+      <h2>RAG Architecture</h2>
+      <p>How startup intelligence is ingested, embedded, retrieved, and used to ground LLM responses.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>RAG Pipeline — Ingestion → Retrieval → Generation</h3>
+    <div class="mermaid">
+flowchart TD
+    subgraph SOURCES["Data Sources"]
+        CB[Crunchbase Export\nStartup profiles · Funding rounds]
+        CBI[CB Insights Reports\nMarket maps · Failure analysis]
+        IND[Indian Startup Ecosystem\nInc42 · Tracxn data]
+        FUND[Global Funding Datasets\nPitchBook · AngelList]
+        PM[Post-Mortems\nStartup Lessons · Failory articles]
+    end
+
+    subgraph INGEST["Ingestion Pipeline"]
+        PARSE[Data Parsers\nCSV · JSON · PDF extractors]
+        CLEAN[Data Cleaner\nDedup · Normalize · Validate]
+        CHUNK[Chunking Strategy\n512-token semantic chunks\nwith 64-token overlap]
+    end
+
+    subgraph EMBED["Embedding Pipeline"]
+        EMB_SVC[OpenAI text-embedding-3-small\n1536 dimensions]
+        META[Metadata Enrichment\nsector · stage · year · geography · outcome]
+    end
+
+    subgraph STORE["Vector Store — Qdrant"]
+        COL1[Collection: startup-profiles\n~500K documents]
+        COL2[Collection: failure-postmortems\n~50K documents]
+        COL3[Collection: market-reports\n~20K documents]
+        COL4[Collection: funding-rounds\n~1M documents]
+    end
+
+    subgraph RETRIEVAL["Retrieval Engine"]
+        QUERY[Query Embedding\nUser startup vector]
+        FILTER[Payload Filter\nsector + stage + geo]
+        ANN[ANN Search\nHNSW cosine · top-20]
+        RERANK[Cross-Encoder Reranker\ntop-20 → top-5]
+    end
+
+    subgraph GEN["Generation — RAG LLM Call"]
+        PROMPT[Prompt Assembly\nSystem + Context chunks + Query]
+        LLM_CALL[LLM Call\nClaude 3.5 Sonnet]
+        GUARD[Output Guardrails\nHallucination check · Citation verify]
+        RESP[Grounded Response\nwith source citations]
+    end
+
+    CB & CBI & IND & FUND & PM --> PARSE
+    PARSE --> CLEAN --> CHUNK
+    CHUNK --> EMB_SVC --> META
+    META --> COL1 & COL2 & COL3 & COL4
+    QUERY --> FILTER --> ANN --> RERANK
+    RERANK --> PROMPT
+    COL1 & COL2 & COL3 & COL4 --> ANN
+    PROMPT --> LLM_CALL --> GUARD --> RESP
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Qdrant Collections</h4>
+      <ul>
+        <li><strong>startup-profiles</strong> — Full startup records with outcome labels</li>
+        <li><strong>failure-postmortems</strong> — Narrative failure analyses</li>
+        <li><strong>market-reports</strong> — Sector & macro trend summaries</li>
+        <li><strong>funding-rounds</strong> — All known investment events</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Chunking Strategy</h4>
+      <ul>
+        <li>Structured profiles: one chunk per startup (dense embedding)</li>
+        <li>Post-mortems: semantic sentence-level chunking (512 tokens)</li>
+        <li>Market reports: paragraph-level with section metadata</li>
+        <li>Overlap: 64 tokens for cross-boundary context</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Retrieval Quality</h4>
+      <ul>
+        <li>Two-stage: ANN (speed) → Cross-Encoder reranker (precision)</li>
+        <li>Payload filters prevent cross-sector noise</li>
+        <li>Reciprocal rank fusion merges multi-query results</li>
+        <li>Minimum relevance threshold: 0.72 cosine score</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 7 — MULTIVERSE SIMULATOR
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">07</div>
+    <div>
+      <h2>Startup Multiverse Simulator Workflow</h2>
+      <p>How counterfactual scenarios are constructed, modeled, and compared as alternate startup futures.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Simulation Pipeline</h3>
+    <div class="mermaid">
+flowchart TD
+    BASE[Baseline Startup Profile\nPrediction: 54% success] --> CTRL
+
+    subgraph CTRL["Scenario Control Panel — UI"]
+        S1[🔧 Funding Slider\n$500K → $2M]
+        S2[👥 Team Slider\n3 → 8 members]
+        S3[📈 Market Toggle\nBull vs Bear market]
+        S4[💰 Pricing Change\nFreemium → Enterprise]
+        S5[📍 Geography Shift\nIndia → USA]
+    end
+
+    S1 & S2 & S3 & S4 & S5 --> DELTA[Compute Feature Deltas\nfrom baseline vector]
+    DELTA --> SCENARIOS
+
+    subgraph SCENARIOS["Scenario Generation Engine"]
+        SC1[Scenario A\nHigh Funding + Same Team]
+        SC2[Scenario B\nLow Funding + Star Hire]
+        SC3[Scenario C\nPivot to Enterprise]
+        SC4[Scenario D\nExpand Geography]
+        SC5[Scenario E\nBear Market Conditions]
+    end
+
+    SC1 & SC2 & SC3 & SC4 & SC5 --> RUN_ML
+
+    subgraph RUN_ML["Re-run ML Models"]
+        RE_XGB[XGBoost re-inference\nper scenario vector]
+        RE_LGB[LightGBM failure mode\nper scenario]
+        TIMESERIES[12/24/36 Month\nRevenue Projection\nusing Prophet]
+    end
+
+    RE_XGB & RE_LGB & TIMESERIES --> COMPARE
+
+    subgraph COMPARE["Outcome Comparison Engine"]
+        DELTA_P[Δ Probability\nvs baseline]
+        RANK[Scenario Ranking\nby success uplift]
+        EXPLAIN[Per-scenario SHAP\nWhat changed most]
+        NARRATE[LLM Narrative\n\"In this universe...\"]
+    end
+
+    COMPARE --> VIZ
+
+    subgraph VIZ["Visualization Output"]
+        CHART1[Grouped Bar Chart\nScenario Success %]
+        CHART2[Timeline Projections\nRevenue / Runway]
+        CARD[Best Scenario Card\nwith rationale]
+    end
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Alternate-Future Narrative Generation</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant UI as Frontend
+    participant API as FastAPI
+    participant SIM as Simulator Engine
+    participant ML as ML Service
+    participant LLM as Claude (Narrative)
+    
+    UI->>API: POST /simulate {overrides: {funding: 2000000, team: 8}}
+    API->>SIM: Build scenario vectors
+    SIM->>ML: Batch inference (5 scenarios)
+    ML-->>SIM: [{prob: 0.71}, {prob: 0.58}, ...]
+    SIM->>LLM: Prompt: "Given these scenario outcomes, narrate 3 alternate futures..."
+    LLM-->>SIM: Narrative JSON [{universe_name, story, key_decision, outcome}]
+    SIM-->>API: Assembled simulation report
+    API-->>UI: {scenarios, timelines, narratives, best_scenario}
+    UI->>UI: Render Multiverse Dashboard
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 8 — AI BOARDROOM
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">08</div>
+    <div>
+      <h2>AI Boardroom Workflow</h2>
+      <p>How four specialized AI agents deliberate, debate, and produce a unified board-level recommendation.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Agent Communication Architecture</h3>
+    <div class="mermaid">
+flowchart TD
+    CTX[Startup Analysis Context\nPredictions + Similarity + Market] --> ORCH
+
+    subgraph ORCH["LangChain Orchestrator"]
+        direction TB
+        Q[Context Packager\nFormats domain-specific prompts]
+    end
+
+    ORCH --> AGT1 & AGT2 & AGT3 & AGT4
+
+    subgraph AGT1["🏦 Investor Agent — OpenAI GPT-4o"]
+        I1[System: You are a Series A VC partner...]
+        I2[Evaluate: funding strategy · cap table · burn · exit potential]
+        I3[Output: JSON — rating · concerns · questions · recommendation]
+    end
+
+    subgraph AGT2["🛠 Product Agent — Claude 3.5 Sonnet"]
+        P1[System: You are a CPO with 10 exits...]
+        P2[Evaluate: product-market fit · roadmap · tech moat · UX]
+        P3[Output: JSON — rating · concerns · questions · recommendation]
+    end
+
+    subgraph AGT3["📣 Marketing Agent — Gemini 1.5 Pro"]
+        M1[System: You are a CMO scaling D2C brands...]
+        M2[Evaluate: GTM strategy · branding · CAC · virality]
+        M3[Output: JSON — rating · concerns · questions · recommendation]
+    end
+
+    subgraph AGT4["💰 Financial Agent — OpenAI GPT-4o"]
+        F1[System: You are a CFO and fintech advisor...]
+        F2[Evaluate: unit economics · runway · revenue model · fundraising]
+        F3[Output: JSON — rating · concerns · questions · recommendation]
+    end
+
+    AGT1 & AGT2 & AGT3 & AGT4 --> SYNTH
+
+    subgraph SYNTH["Synthesis Layer"]
+        AGG[Aggregate all 4 agent JSONs]
+        DEBATE[Conflict Detection\nFind disagreements across agents]
+        RESOLVE[Resolution Prompt\nPresent conflicts → ask LLM to resolve]
+        FINAL[Consensus Board Report\nJSON + Markdown]
+    end
+
+    SYNTH --> BOARD_OUT
+
+    subgraph BOARD_OUT["Board Output"]
+        SCORE[Overall Board Score\nWeighted avg of 4 agent ratings]
+        TOP3[Top 3 Critical Issues]
+        PLAN[90-Day Action Plan]
+        PDF[Downloadable PDF Report]
+    end
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Agent Interaction Sequence</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant ORCH as Orchestrator
+    participant INV as Investor Agent
+    participant PRD as Product Agent
+    participant MKT as Marketing Agent
+    participant FIN as Financial Agent
+    participant SYNTH as Synthesis LLM
+
+    Note over ORCH: Phase 1 — Independent Analysis (parallel)
+    par Parallel Calls
+        ORCH->>INV: Analyze from investor perspective
+        ORCH->>PRD: Analyze from product perspective
+        ORCH->>MKT: Analyze from marketing perspective
+        ORCH->>FIN: Analyze from financial perspective
+    end
+    INV-->>ORCH: {rating:6.5, concerns:[...], recs:[...]}
+    PRD-->>ORCH: {rating:7.2, concerns:[...], recs:[...]}
+    MKT-->>ORCH: {rating:5.8, concerns:[...], recs:[...]}
+    FIN-->>ORCH: {rating:6.1, concerns:[...], recs:[...]}
+
+    Note over ORCH: Phase 2 — Cross-Agent Review
+    ORCH->>INV: Product agent flagged GTM risk. Your view?
+    INV-->>ORCH: Agree — unit economics worsen without GTM clarity
+    ORCH->>FIN: Investor noted cap table concern. Financial impact?
+    FIN-->>ORCH: Dilution at Series A may harm founder control
+
+    Note over ORCH: Phase 3 — Synthesis
+    ORCH->>SYNTH: All agent outputs + cross-review → create board consensus
+    SYNTH-->>ORCH: Board Report JSON {consensus_score, critical_issues, action_plan}
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 9 — DEVELOPMENT ROADMAP
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s9">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">09</div>
+    <div>
+      <h2>Development Roadmap</h2>
+      <p>Four phased delivery from MVP to enterprise-grade platform.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Roadmap Timeline</h3>
+    <div class="mermaid">
+gantt
+    title VentureVerse AI — Development Roadmap
+    dateFormat YYYY-MM
+    section Phase 1 MVP
+        Auth & User Management       :2024-01, 3w
+        Startup Input Form            :2024-01, 2w
+        ML Pipeline (XGBoost)         :2024-02, 4w
+        Basic Results Dashboard       :2024-02, 3w
+        Graveyard Database Seed       :2024-03, 2w
+        PostgreSQL + API Layer        :2024-01, 6w
+    section Phase 2 AI Features
+        Qdrant Setup + Embeddings     :2024-04, 3w
+        RAG Integration               :2024-04, 4w
+        AI Boardroom (4 Agents)       :2024-05, 5w
+        Founder DNA Module            :2024-05, 3w
+        SHAP Explainability           :2024-06, 2w
+    section Phase 3 Advanced Simulation
+        Multiverse Simulator          :2024-07, 5w
+        Neo4j Graph Integration       :2024-07, 4w
+        Market Pulse Engine           :2024-08, 3w
+        Failure Similarity Engine     :2024-08, 3w
+        LightGBM + Ensemble           :2024-09, 2w
+    section Phase 4 Enterprise
+        Multi-tenant Architecture     :2024-10, 4w
+        Admin Dashboard               :2024-10, 3w
+        API Access (Partner tier)     :2024-11, 3w
+        Custom Model Fine-tuning      :2024-11, 4w
+        SOC2 Compliance               :2024-12, 4w
+    </div>
+  </div>
+
+  <div class="phase-row">
+    <div class="phase">
+      <div class="phase-label">Phase 1 · Months 1–3</div>
+      <h4>MVP — Core Prediction</h4>
+      <ul>
+        <li>Auth (JWT + Google OAuth)</li>
+        <li>Startup Input Form</li>
+        <li>XGBoost failure predictor</li>
+        <li>Basic results dashboard</li>
+        <li>PostgreSQL data model</li>
+        <li>Graveyard seed dataset (5K startups)</li>
+        <li>FastAPI + Next.js skeleton</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-label">Phase 2 · Months 4–6</div>
+      <h4>AI Features</h4>
+      <ul>
+        <li>Qdrant vector DB + embeddings</li>
+        <li>RAG pipeline for grounded responses</li>
+        <li>AI Boardroom (4 agents)</li>
+        <li>Founder DNA analysis module</li>
+        <li>SHAP explainability dashboard</li>
+        <li>Recommendation engine v1</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-label">Phase 3 · Months 7–9</div>
+      <h4>Advanced Simulation</h4>
+      <ul>
+        <li>Multiverse Simulator UI + backend</li>
+        <li>Neo4j graph database integration</li>
+        <li>Market Pulse live data engine</li>
+        <li>LightGBM + Random Forest ensemble</li>
+        <li>Failure Similarity Engine</li>
+        <li>Time-series projections (Prophet)</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-label">Phase 4 · Months 10–12</div>
+      <h4>Enterprise & Scale</h4>
+      <ul>
+        <li>Multi-tenant workspace isolation</li>
+        <li>Admin dataset upload portal</li>
+        <li>Public API (partner access)</li>
+        <li>Custom model fine-tuning per client</li>
+        <li>SOC 2 Type II compliance</li>
+        <li>White-label option</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 10 — ADMIN WORKFLOW
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s10">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">10</div>
+    <div>
+      <h2>Admin Workflow</h2>
+      <p>Dataset ingestion, cleaning, embedding, model retraining, and vector DB update pipeline.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Admin Data Pipeline</h3>
+    <div class="mermaid">
+flowchart TD
+    ADM([Admin logs into Admin Portal]) --> UP
+
+    subgraph UP["Dataset Upload"]
+        UP1[Upload CSV / JSON / PDF\nvia Admin Dashboard]
+        UP2[Select dataset type\ngraveyard · funding · market · postmortem]
+        UP3[Set metadata tags\nsector · geography · year-range]
+    end
+
+    UP3 --> VAL
+
+    subgraph VAL["Validation & Quality"]
+        VAL1[Schema validation\nagainst dataset type template]
+        VAL2[Duplicate detection\nfuzzy match on startup name + year]
+        VAL3[Quality score\ncompleteness · consistency · range checks]
+        VAL4{Quality score ≥ 80%?}
+        VAL4 -- No --> REJECT[Flag & Return to Admin\nwith error report]
+        VAL4 -- Yes --> PROC
+    end
+
+    PROC --> CLEAN
+
+    subgraph CLEAN["Data Processing"]
+        CLEAN1[Normalize fields\ncurrency · date formats · sector taxonomy]
+        CLEAN2[Fill missing values\nmedian imputation · sector defaults]
+        CLEAN3[Feature engineering\nderived fields computation]
+        CLEAN4[Write to PostgreSQL\nstaging table]
+    end
+
+    CLEAN4 --> EMB
+
+    subgraph EMB["Embedding Pipeline — Celery Worker"]
+        EMB1[Chunk documents\n512-token semantic segments]
+        EMB2[Batch embed\nOpenAI API — 100 chunks/call]
+        EMB3[Attach metadata payload\nsector · outcome · stage · geo]
+        EMB4[Upsert to Qdrant\nby collection type]
+    end
+
+    EMB4 --> TRAIN
+
+    subgraph TRAIN["Model Retraining — Celery Beat Monthly"]
+        TRAIN1[Pull labeled training data\nfrom PostgreSQL]
+        TRAIN2[Train XGBoost / LightGBM / RF\nwith Optuna hyperparameter tuning]
+        TRAIN3[Evaluate: AUROC · F1 · Precision/Recall]
+        TRAIN4{New model better\nthan production?}
+        TRAIN4 -- Yes --> DEPLOY[Deploy new model\nSave to S3 model registry\nUpdate ML Service]
+        TRAIN4 -- No --> KEEP[Keep existing model\nLog evaluation results]
+    end
+
+    DEPLOY --> NOTIFY[Notify Admin\nSlack + Email alert]
+    EMB4 --> GRAPH
+
+    subgraph GRAPH["Neo4j Update"]
+        GRAPH1[Extract entity relationships\nStartup → Founder → Investor]
+        GRAPH2[MERGE nodes and relationships\nCypher upsert queries]
+        GRAPH3[Run community detection\nLouvain on new nodes]
+    end
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 11 — API ARCHITECTURE
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s11">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">11</div>
+    <div>
+      <h2>API Architecture</h2>
+      <p>All REST & WebSocket endpoints, request/response contracts, and auth flows.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Authentication Flow</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant GW as API Gateway
+    participant AUTH as Auth Service
+    participant DB as PostgreSQL
+    participant REDIS as Redis
+
+    C->>GW: POST /auth/register {email, password, name}
+    GW->>AUTH: Validate + hash password (bcrypt)
+    AUTH->>DB: INSERT user record
+    AUTH->>AUTH: Send verification email (SES)
+    AUTH-->>C: 201 {message: "verify your email"}
+
+    C->>GW: POST /auth/login {email, password}
+    GW->>AUTH: Verify credentials
+    AUTH->>DB: SELECT user WHERE email=?
+    AUTH->>REDIS: SET refresh_token:{user_id} TTL 7d
+    AUTH-->>C: 200 {access_token (15m), refresh_token (7d)}
+
+    C->>GW: Any protected request + Bearer token
+    GW->>AUTH: Validate JWT signature + expiry
+    AUTH-->>GW: {user_id, plan, permissions}
+    GW->>GW: Attach user context to request
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Core API Endpoints</h3>
+    <table>
+      <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th><th>Response</th></tr></thead>
+      <tbody>
+        <tr><td><code>POST</code></td><td><code>/auth/register</code></td><td>Create new user account</td><td>Public</td><td>201 user object</td></tr>
+        <tr><td><code>POST</code></td><td><code>/auth/login</code></td><td>Email/password login</td><td>Public</td><td>200 JWT pair</td></tr>
+        <tr><td><code>POST</code></td><td><code>/auth/refresh</code></td><td>Refresh access token</td><td>Refresh token</td><td>200 new access_token</td></tr>
+        <tr><td><code>GET</code></td><td><code>/projects</code></td><td>List user's projects</td><td>JWT</td><td>200 project[]</td></tr>
+        <tr><td><code>POST</code></td><td><code>/projects</code></td><td>Create new project</td><td>JWT</td><td>201 project</td></tr>
+        <tr><td><code>POST</code></td><td><code>/analyze</code></td><td>Submit startup for full analysis</td><td>JWT</td><td>202 task_id</td></tr>
+        <tr><td><code>GET</code></td><td><code>/analyze/{task_id}</code></td><td>Poll analysis status</td><td>JWT</td><td>200 status + results</td></tr>
+        <tr><td><code>GET</code></td><td><code>/predictions/{project_id}</code></td><td>Get prediction report</td><td>JWT</td><td>200 prediction object</td></tr>
+        <tr><td><code>POST</code></td><td><code>/simulate</code></td><td>Run scenario simulation</td><td>JWT Pro</td><td>200 simulation results</td></tr>
+        <tr><td><code>GET</code></td><td><code>/simulate/{project_id}</code></td><td>List past simulations</td><td>JWT</td><td>200 simulation[]</td></tr>
+        <tr><td><code>POST</code></td><td><code>/boardroom</code></td><td>Trigger AI boardroom session</td><td>JWT Pro</td><td>200 board_report</td></tr>
+        <tr><td><code>WS</code></td><td><code>/boardroom/stream</code></td><td>Stream boardroom responses live</td><td>JWT Pro</td><td>SSE stream</td></tr>
+        <tr><td><code>GET</code></td><td><code>/founder-dna/{project_id}</code></td><td>Founder DNA analysis</td><td>JWT</td><td>200 dna_report</td></tr>
+        <tr><td><code>GET</code></td><td><code>/market-pulse</code></td><td>Sector + macro market data</td><td>JWT</td><td>200 market_report</td></tr>
+        <tr><td><code>GET</code></td><td><code>/graveyard/search</code></td><td>Search failed startups</td><td>JWT</td><td>200 startup[]</td></tr>
+        <tr><td><code>GET</code></td><td><code>/recommendations/{project_id}</code></td><td>Get ranked recommendations</td><td>JWT</td><td>200 recommendation[]</td></tr>
+        <tr><td><code>POST</code></td><td><code>/admin/upload</code></td><td>Upload new dataset</td><td>Admin</td><td>202 upload_task_id</td></tr>
+        <tr><td><code>POST</code></td><td><code>/admin/retrain</code></td><td>Trigger model retraining</td><td>Admin</td><td>202 retrain_task_id</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="diagram-box">
+    <h3>Analyze Endpoint — Request / Response Contract</h3>
+    <div class="mermaid">
+sequenceDiagram
+    participant FE as Next.js
+    participant GW as API Gateway
+    participant FA as FastAPI
+    participant WK as Celery Worker
+    participant REDIS as Redis
+
+    FE->>GW: POST /analyze + Bearer JWT
+    GW->>FA: Forward validated request
+    FA->>FA: Validate payload (Pydantic)
+    FA->>REDIS: Enqueue Celery task
+    FA-->>FE: 202 {task_id: "abc123", status: "queued"}
+
+    Note over WK: Worker picks up task
+    WK->>WK: Run full AI pipeline (~15s)
+    WK->>REDIS: SET result:abc123 {full_report}
+
+    FE->>FA: GET /analyze/abc123 (polling every 3s)
+    FA->>REDIS: GET result:abc123
+    REDIS-->>FA: null (still processing)
+    FA-->>FE: 200 {status: "processing", progress: 42}
+
+    WK-->>REDIS: Task complete
+    FE->>FA: GET /analyze/abc123
+    FA->>REDIS: GET result:abc123
+    REDIS-->>FA: {full_report JSON}
+    FA-->>FE: 200 {status: "complete", data: {...}}
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 12 — PRODUCTION DEPLOYMENT
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s12">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">12</div>
+    <div>
+      <h2>Production Deployment Architecture</h2>
+      <p>AWS-native infrastructure with CI/CD, auto-scaling, HA, and observability.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>AWS Cloud Architecture</h3>
+    <div class="mermaid">
+graph TB
+    subgraph INTERNET["Internet"]
+        USER[👤 End Users]
+    end
+
+    subgraph EDGE_LAYER["Edge Layer"]
+        CF[Cloudflare\nDDoS · WAF · CDN]
+        VERCEL[Vercel\nNext.js Frontend\nEdge Functions]
+    end
+
+    subgraph AWS_REGION["AWS ap-south-1 (Mumbai) + us-east-1 (Primary)"]
+        subgraph PUBLIC["Public Subnet"]
+            ALB[Application Load Balancer\nHTTPS · SSL Termination]
+            AGW[AWS API Gateway\nRate Limit · Auth]
+        end
+
+        subgraph PRIVATE["Private Subnet — ECS Fargate"]
+            FA_SVC[FastAPI Service\n2–10 tasks · Auto Scale]
+            ML_SVC[ML Service\n1–4 tasks · GPU optional]
+            AGT_SVC[Agent Orchestrator\n1–4 tasks]
+            WORKER[Celery Workers\n2–8 tasks]
+        end
+
+        subgraph DATA_LAYER["Data Layer"]
+            RDS[(RDS PostgreSQL\nMulti-AZ · db.r6g.large\nRead Replica × 2)]
+            REDIS_EC[(ElastiCache Redis\nCluster Mode · 3 nodes)]
+            S3_BUCK[(S3 Buckets\nmodels/ · datasets/\nreports/ · backups/)]
+        end
+
+        subgraph EXTERNAL_DB["External Managed DBs"]
+            QDRANT_C[(Qdrant Cloud\nManaged Cluster\n3 nodes)]
+            NEO4J_A[(Neo4j Aura\nManaged Graph DB)]
+        end
+
+        subgraph CICD["CI/CD Pipeline"]
+            GH[GitHub Repository]
+            GA[GitHub Actions\nLint · Test · Build]
+            ECR[AWS ECR\nDocker Image Registry]
+            ECS_DEP[ECS Deployment\nBlue/Green via CodeDeploy]
+        end
+
+        subgraph OBS["Observability"]
+            CW[CloudWatch\nLogs · Metrics · Alarms]
+            SENTRY[Sentry\nAPM · Error Tracking]
+            XRAY[AWS X-Ray\nDistributed Tracing]
+        end
+    end
+
+    USER --> CF --> VERCEL
+    VERCEL --> CF --> AGW --> ALB --> FA_SVC
+    FA_SVC --> ML_SVC & AGT_SVC & WORKER
+    FA_SVC --> RDS & REDIS_EC & QDRANT_C & NEO4J_A
+    ML_SVC --> S3_BUCK
+    WORKER --> RDS & S3_BUCK & REDIS_EC
+    GH --> GA --> ECR --> ECS_DEP --> FA_SVC
+    FA_SVC --> CW & SENTRY & XRAY
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>ECS Fargate Auto-Scaling</h4>
+      <ul>
+        <li>FastAPI: min 2, max 10 tasks — scale on CPU 60%</li>
+        <li>ML Service: min 1, max 4 — scale on queue depth</li>
+        <li>Celery Workers: min 2, max 8 — scale on SQS queue</li>
+        <li>Scheduled scale-down at 02:00 UTC</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>CI/CD Pipeline</h4>
+      <ul>
+        <li>GitHub Actions: lint → pytest → Docker build</li>
+        <li>Push to ECR on main branch merge</li>
+        <li>Blue/Green deployment via AWS CodeDeploy</li>
+        <li>Automatic rollback on health check failure</li>
+        <li>DB migrations run pre-deployment (Alembic)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Security</h4>
+      <ul>
+        <li>VPC with private subnets for all services</li>
+        <li>AWS Secrets Manager for all credentials</li>
+        <li>KMS encryption at rest for RDS + S3</li>
+        <li>IAM roles with least-privilege per service</li>
+        <li>WAF rules: SQLi, XSS, rate limiting</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Cost Optimization</h4>
+      <ul>
+        <li>Fargate Spot for Celery workers (save 70%)</li>
+        <li>S3 Intelligent-Tiering for model artifacts</li>
+        <li>Redis cache reduces LLM API calls by ~60%</li>
+        <li>RDS reserved instances (1-year commitment)</li>
+        <li>LLM routing to cheapest model by task type</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     SECTION 13 — MASTER DIAGRAM
+     ════════════════════════════════════════════════════ -->
+<div class="section" id="s13">
+<div class="section-inner">
+  <div class="section-header">
+    <div class="sec-num">13</div>
+    <div>
+      <h2>Complete Master Ecosystem Diagram</h2>
+      <p>One unified view of the entire VentureVerse AI platform — every system, every connection.</p>
+    </div>
+  </div>
+
+  <div class="diagram-box">
+    <h3>VentureVerse AI — Master Architecture</h3>
+    <div class="mermaid">
+flowchart TD
+    USER([👤 Founder / Investor]) -->|HTTPS| VERCEL
+
+    subgraph FRONTEND["🖥 Frontend — Vercel + Next.js"]
+        VERCEL[Next.js App\nLanding · Dashboard · Boardroom\nSimulator · Graveyard · DNA]
+    end
+
+    VERCEL -->|REST + WebSocket| AGW
+
+    subgraph GATEWAY["🔒 API Gateway + Auth"]
+        AGW[AWS API Gateway\nRate Limit · WAF]
+        AUTH[JWT Auth\nFastAPI Middleware]
+        AGW --> AUTH
+    end
+
+    AUTH --> FASTAPI
+
+    subgraph BACKEND["⚙️ Backend — FastAPI on ECS Fargate"]
+        FASTAPI[FastAPI Router\nRequest Orchestrator]
+        CELERY[Celery Workers\nAsync + Scheduled Jobs]
+        REDIS[(Redis Cache\nQueue · Session · TTL)]
+        FASTAPI --> CELERY
+        FASTAPI <--> REDIS
+    end
+
+    FASTAPI --> ML_PIPELINE & VECTOR_LAYER & GRAPH_LAYER & AGENT_LAYER & MARKET_ENG
+
+    subgraph ML_PIPELINE["🤖 ML Prediction Pipeline"]
+        XGB[XGBoost\nSuccess Probability]
+        LGB[LightGBM\nFailure Mode]
+        RF[Random Forest\nRisk Score]
+        ENS[Ensemble\n+ SHAP Explainer]
+        XGB & LGB & RF --> ENS
+    end
+
+    subgraph VECTOR_LAYER["🔍 Vector Intelligence — Qdrant"]
+        EMB[Embedding Service\nOpenAI text-embedding-3-small]
+        QD[(Qdrant\nstartup-profiles\ngraveyard · market)]
+        SIMENG[Similarity Engine\nANN + Reranker]
+        EMB --> QD --> SIMENG
+    end
+
+    subgraph GRAPH_LAYER["🕸 Graph Intelligence — Neo4j"]
+        NEO[(Neo4j\nStartup · Founder\nInvestor · Market)]
+        PATTERN[Failure Pattern\nSubgraph Detection]
+        NEO --> PATTERN
+    end
+
+    subgraph AGENT_LAYER["🤖 AI Boardroom — LangChain"]
+        INV_A[Investor Agent\nOpenAI GPT-4o]
+        PRD_A[Product Agent\nClaude 3.5]
+        MKT_A[Marketing Agent\nGemini 1.5]
+        FIN_A[Financial Agent\nOpenAI GPT-4o]
+        ORCH_A[Orchestrator\nConsensus Report]
+        INV_A & PRD_A & MKT_A & FIN_A --> ORCH_A
+    end
+
+    subgraph MARKET_ENG["📡 Market Pulse Engine"]
+        MACRO[Economic Indicators\nCPI · Interest Rates]
+        FUND_DATA[Funding Trend Data\nSector momentum]
+        MKT_SCORE[Market Timing Score]
+        MACRO & FUND_DATA --> MKT_SCORE
+    end
+
+    subgraph SIMULATOR["🌀 Multiverse Simulator"]
+        CTRL_PANEL[Scenario Controls\nFunding · Team · Pricing]
+        RE_INFER[ML Re-inference\nper scenario]
+        NARRATIVES[LLM Narratives\nAlternate futures]
+        CTRL_PANEL --> RE_INFER --> NARRATIVES
+    end
+
+    subgraph DNA_MODULE["🧬 Founder DNA"]
+        DNA_NLP[NLP Analysis\nLeadership · Risk · Style]
+        DNA_REPORT[DNA Report\nPersonalized insights]
+        DNA_NLP --> DNA_REPORT
+    end
+
+    subgraph REC_ENGINE["💡 Recommendation Engine"]
+        RAG_R[RAG Retrieval\nQdrant pivot cases]
+        LLM_REC[LLM Action Plan\nClaude Writer]
+        RANKED[Ranked Recs\nImpact × Effort]
+        RAG_R --> LLM_REC --> RANKED
+    end
+
+    subgraph DATA_STORES["🗄 Persistent Data"]
+        PG[(PostgreSQL RDS\nAll user + project data)]
+        S3[(AWS S3\nModels · Reports · Datasets)]
+    end
+
+    subgraph ADMIN_PORTAL["🛠 Admin Portal"]
+        UPLOAD[Dataset Upload]
+        RETRAIN[Model Retrain]
+        MONITOR[System Monitor]
+    end
+
+    ENS --> FASTAPI
+    SIMENG --> FASTAPI
+    PATTERN --> FASTAPI
+    ORCH_A --> FASTAPI
+    MKT_SCORE --> FASTAPI
+    NARRATIVES --> FASTAPI
+    DNA_REPORT --> FASTAPI
+    RANKED --> FASTAPI
+
+    FASTAPI --> PG
+    CELERY --> PG & S3
+    ADMIN_PORTAL --> CELERY
+
+    FASTAPI -->|Final JSON| VERCEL
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Data Flow Summary</h4>
+      <ul>
+        <li>User inputs flow through validation → feature engineering → 3 ML models in parallel</li>
+        <li>Qdrant serves similarity + RAG context in every analysis</li>
+        <li>Neo4j enriches predictions with network intelligence</li>
+        <li>4 LLM agents run in parallel; orchestrator synthesizes board consensus</li>
+        <li>Redis caches all expensive computations (TTL 1h)</li>
+        <li>All results persisted to PostgreSQL for history and re-access</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>10 Core Modules — Coverage</h4>
+      <ul>
+        <li>✅ Startup Failure Predictor</li>
+        <li>✅ Graveyard Intelligence</li>
+        <li>✅ Similar Startup Discovery</li>
+        <li>✅ Multiverse Simulator</li>
+        <li>✅ AI Boardroom (4 Agents)</li>
+        <li>✅ Founder DNA Analysis</li>
+        <li>✅ Market Pulse Engine</li>
+        <li>✅ Failure Similarity Engine</li>
+        <li>✅ Explainable AI Dashboard</li>
+        <li>✅ Opportunity Recommendations</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Non-Functional Targets</h4>
+      <ul>
+        <li>Analysis latency: &lt;20s (P95)</li>
+        <li>Similarity search: &lt;50ms</li>
+        <li>API uptime: 99.9% SLA</li>
+        <li>ML model AUROC: ≥0.87</li>
+        <li>LLM hallucination rate: &lt;5% (guardrails)</li>
+        <li>Data encryption at rest + in transit</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <strong>VentureVerse AI</strong> — Complete System Architecture Blueprint · Version 1.0<br>
+  Designed as a production-ready SaaS architecture · All diagrams are illustrative of the intended system design<br>
+  <br>
+  <span style="color:var(--teal)">Tech Stack: Next.js · FastAPI · PostgreSQL · Qdrant · Neo4j · XGBoost · LightGBM · OpenAI · Claude · Gemini · AWS</span>
+</footer>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#307082',
+    primaryTextColor: '#ECE7DC',
+    primaryBorderColor: '#6CA3A2',
+    lineColor: '#6CA3A2',
+    secondaryColor: '#192d3e',
+    tertiaryColor: '#1e3344',
+    background: '#12212E',
+    mainBkg: '#192d3e',
+    nodeBorder: '#307082',
+    clusterBkg: '#1a2f42',
+    titleColor: '#ECE7DC',
+    edgeLabelBackground: '#12212E',
+    attributeBackgroundColorEven: '#192d3e',
+    attributeBackgroundColorOdd: '#1e3344',
+    fillType0: '#307082',
+    fillType1: '#6CA3A2',
+    fillType2: '#EA9940',
+    fillType3: '#1e3344',
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: '13px',
+  },
+  flowchart: { curve: 'basis', htmlLabels: true },
+  sequence: { actorMargin: 60, mirrorActors: false },
+  gantt: { axisFormat: '%b %Y', numberSectionStyles: 4 },
+  journey: { taskFillColor: '#307082' },
+});
+</script>
+</body>
+</html>
